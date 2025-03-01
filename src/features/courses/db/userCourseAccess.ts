@@ -1,32 +1,21 @@
-import { getGlobalTag, getIdTag, getUserTag } from "@/lib/dataCache"
-import { revalidateTag } from "next/cache"
+import { db } from "@/drizzle/db";
+import { UserCourseAccessTable } from "@/drizzle/schema";
+import { revalidateUserCourseAccessCache } from "../cache/userCourseAccess";
 
-export function getUserCourseAccessGlobalTag() {
-  return getGlobalTag("userCourseAccess")
-}
+export async function addUserCourseAccess(
+    {
+        userId,
+        coursesId,
+    }: {
+        userId: string;
+        coursesId: string[];
+    }, trx: Omit<typeof db, "$client"> = db
+) {
 
-export function getUserCourseAccessIdTag({
-  courseId,
-  userId,
-}: {
-  courseId: string
-  userId: string
-}) {
-  return getIdTag("userCourseAccess", `course:${courseId}-user:${userId}`)
-}
+    const accesses = await trx.insert(UserCourseAccessTable).values(coursesId.map(courseId => ({ userId, courseId }))).onConflictDoNothing().returning()
 
-export function getUserCourseAccessUserTag(userId: string) {
-  return getUserTag("userCourseAccess", userId)
-}
 
-export function revalidateUserCourseAccessCache({
-  courseId,
-  userId,
-}: {
-  courseId: string
-  userId: string
-}) {
-  revalidateTag(getUserCourseAccessGlobalTag())
-  revalidateTag(getUserCourseAccessIdTag({ courseId, userId }))
-  revalidateTag(getUserCourseAccessUserTag(userId))
+    accesses.forEach(revalidateUserCourseAccessCache)
+
+    return accesses
 }

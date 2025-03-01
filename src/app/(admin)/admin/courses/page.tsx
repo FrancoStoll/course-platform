@@ -9,7 +9,7 @@ import {
 } from "@/drizzle/schema";
 import { getCourseGlobalTag } from "@/features/courses/cache/courses.cache";
 import { CourseTable as CourseTableGrid } from "@/features/courses/components/CourseTable";
-import { getUserCourseAccessGlobalTag } from "@/features/courses/db/userCourseAccess";
+import { getUserCourseAccessGlobalTag } from "@/features/courses/cache/userCourseAccess";
 import { getCourseSectionGlobalTag } from "@/features/courseSections/db/cache";
 import { getLessonGlobalTag } from "@/features/lessons/db/cache/lesson.cache.";
 import { asc, countDistinct, eq } from "drizzle-orm";
