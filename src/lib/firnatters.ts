@@ -21,3 +21,25 @@ export function formatPrice(amount: number, { showZeroAsNumber = false } = {}) {
 
     return formatter.format(amount)
 }
+
+const DATE_FORMATER = new Intl.DateTimeFormat(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short'
+})
+
+export function formatDate(date: Date) {
+
+    return DATE_FORMATER.format(date)
+
+
+}
+
+export function formatNumber(
+    number: number,
+    options?: Intl.NumberFormatOptions
+) {
+
+    const formatter = new Intl.NumberFormat(undefined, options)
+    return formatter.format(number)
+
+}

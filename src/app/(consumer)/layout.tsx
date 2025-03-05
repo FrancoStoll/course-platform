@@ -40,7 +40,7 @@ function Navbar() {
             </Link>
             <Link
               className="hover:bg-accent/10 flex items-center px-2"
-              href={"/purchase"}
+              href={"/purchases"}
             >
               Purchase History
             </Link>

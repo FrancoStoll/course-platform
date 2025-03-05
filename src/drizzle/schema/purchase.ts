@@ -1,8 +1,9 @@
 import { createdAt, id, updatedAt } from "@/drizzle/schemaHelper";
-import { integer, jsonb, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { integer, jsonb, pgTable, primaryKey, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { UserTable } from "./user";
 import { ProductTable } from "./product";
 import { relations } from "drizzle-orm";
+
 
 
 
@@ -17,11 +18,13 @@ export const PurchaseTable = pgTable("purchases", {
     createdAt,
     updatedAt,
 
-})
+}, t => ({
+    uniqueUserProduct: unique().on(t.userId, t.productId, t.stripeSessionId)
+}))
 
 
 export const PurchaseRelationships = relations(PurchaseTable, ({ one }) => ({
-    user: one(UserTable, {
+    user: one(UserTable, { 
         fields: [PurchaseTable.userId],
         references: [UserTable.id]
     }),

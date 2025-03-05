@@ -1,63 +1,27 @@
 "use server"
 
-import { z } from "zod"
-
 import { getCurrentUser } from "@/services/clerk"
+import { canUpdateUserLessonCompleteStatus } from "../permissions/userLessonComplete";
+import { updateLessonCompleteStatusDb } from "../db/userLessonComplete";
 
-import {
-  getNextCourseLessonOrder,
-  insertLesson,
-  updateLesson as updateLessonDb,
-  deleteLesson as deleteLessonDb,
-  updateLessonOrders as updateLessonOrdersDb,
-} from "../db/lesson.db"
-import { lessonsSchema } from "../schemas/lessons.schema"
 
-export async function createLesson(unsafeData: z.infer<typeof lessonSchema>) {
-  const { success, data } = lessonsSchema.safeParse(unsafeData)
 
-  if (!success || !canCreateLessons(await getCurrentUser())) {
-    return { error: true, message: "There was an error creating your lesson" }
+
+export async function updateLessonCompleteStatus(lessonId: string, complete: boolean) {
+
+
+  const { userId } = await getCurrentUser();
+
+  const hasPermission = await canUpdateUserLessonCompleteStatus({ userId }, lessonId);
+
+  if (userId == null || !hasPermission) {
+    return { error: true, message: "Error updating your lesson completion status" }
   }
 
-  const order = await getNextCourseLessonOrder(data.sectionId)
+  await updateLessonCompleteStatusDb({ lessonId, userId, complete })
 
-  await insertLesson({ ...data, order })
-
-  return { error: false, message: "Successfully created your lesson" }
-}
-
-export async function updateLesson(
-  id: string,
-  unsafeData: z.infer<typeof lessonSchema>
-) {
-  const { success, data } = lessonSchema.safeParse(unsafeData)
-
-  if (!success || !canUpdateLessons(await getCurrentUser())) {
-    return { error: true, message: "There was an error updating your lesson" }
+  return {
+    error: false, message: "Successfully updated lesson completion status"
   }
 
-  await updateLessonDb(id, data)
-
-  return { error: false, message: "Successfully updated your lesson" }
-}
-
-export async function deleteLesson(id: string) {
-  if (!canDeleteLessons(await getCurrentUser())) {
-    return { error: true, message: "Error deleting your lesson" }
-  }
-
-  await deleteLessonDb(id)
-
-  return { error: false, message: "Successfully deleted your lesson" }
-}
-
-export async function updateLessonOrders(lessonIds: string[]) {
-  if (lessonIds.length === 0 || !canUpdateLessons(await getCurrentUser())) {
-    return { error: true, message: "Error reordering your lessons" }
-  }
-
-  await updateLessonOrdersDb(lessonIds)
-
-  return { error: false, message: "Successfully reordered your lessons" }
 }

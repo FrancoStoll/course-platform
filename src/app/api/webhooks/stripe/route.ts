@@ -2,7 +2,7 @@ import { env } from "@/data/env/server";
 import { db } from "@/drizzle/db";
 import { ProductTable, UserTable } from "@/drizzle/schema";
 import { addUserCourseAccess } from "@/features/courses/db/userCourseAccess";
-import { insertPurchase } from "@/features/purchases/purchases";
+import { insertPurchase } from "@/features/purchases/db/purchases";
 import { stripeServerClient } from "@/services/stripe/stripeServer";
 import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         case "checkout.session.async_payment_succeeded": {
             try {
                 await processStripeCheckout(event.data.object)
-            } catch (error) {
+            } catch {
                 return new Response(null, { status: 500 })
             }
         }

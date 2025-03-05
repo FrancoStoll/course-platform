@@ -4,6 +4,7 @@ import { getUserIdTag } from "@/features/users/db/cache"
 import { auth, clerkClient } from "@clerk/nextjs/server"
 import { eq } from "drizzle-orm"
 import { cacheTag } from "next/dist/server/use-cache/cache-tag"
+import { redirect } from "next/navigation"
 
 
 const client = await clerkClient()
@@ -12,6 +13,13 @@ const client = await clerkClient()
 export async function getCurrentUser({ allData = false } = {}) {
 
     const { userId, sessionClaims, redirectToSignIn } = await auth()
+
+
+
+    // if (userId != null && sessionClaims.dbId == null) {
+    //     redirect("/api/clerk/syncUsers")
+    // }
+
 
 
     return {
@@ -46,7 +54,7 @@ async function getUser(id: string) {
 
     cacheTag(getUserIdTag(id))
 
-    console.log("called")
+
 
     const user = await db.query.UserTable.findFirst({
         where: eq(UserTable.id, id)

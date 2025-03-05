@@ -14,4 +14,5 @@ export default defineConfig({
     host: env.DB_HOST,
     ssl: false,
   },
+
 })
